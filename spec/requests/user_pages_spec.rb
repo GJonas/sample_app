@@ -64,7 +64,7 @@ describe "User pages" do
 
 	describe "signup" do
 		before { visit signup_path }
-		let(:submit) { "Create my account" }
+		let(:submit) { "submit_user" }
 		describe "with invalid information" do
 			it "should not create a user" do
 				expect { click_button submit }.not_to change(User, :count)
@@ -96,7 +96,7 @@ describe "User pages" do
 		end
 
 		describe "with invalid information" do
-			before { click_button "Save changes" }
+			before { click_button "Update User" }
 
 			it { should have_content('error') }
 		end
@@ -108,8 +108,8 @@ describe "User pages" do
 				fill_in "Name",             with: new_name
 				fill_in "Email",            with: new_email
 				fill_in "Password",         with: user.password
-				fill_in "Confirm Password", with: user.password
-				click_button "Save changes"
+				fill_in "user_password_confirmation", with: user.password
+				click_button "submit_user"
 			end
 
 			it { should have_title(new_name) }
@@ -129,11 +129,27 @@ describe "User pages" do
 					patch user_path(user), params
 				end
 				#specify { expect(user.reload).not_to be_admin }
+			end
+		end	
+		describe "profile page" do
+			let(:user) { FactoryGirl.create(:user) }
+			let!(:m1) { FactoryGirl.create(:micropost, user: user, content: "Foo") }
+			let!(:m2) { FactoryGirl.create(:micropost, user: user, content: "Bar") }
+
+			before { visit user_path(user) }
+
+			it { should have_content(user.name) }
+			it { should have_title(user.name) }
+
+			describe "microposts" do
+				it { should have_content(m1.content) }
+				it { should have_content(m2.content) }
+				it { should have_content(user.microposts.count) }
+			end
 		end
-	end	
 		
 
-end
+	end
 
 
 
